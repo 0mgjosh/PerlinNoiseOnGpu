@@ -27,7 +27,7 @@ float2 randomGradient(float2 p)
 {
     p = p + 0.02;
     float x = dot(p, float2(123.4, 234.5));
-    float y = dot(p, float2(234.5, 345.6));
+    float y = dot(p, float2(234.5, 335.6));
     float2 gradient = float2(x, y);
     gradient = sin(gradient);
     gradient = gradient * 43758.5453;
