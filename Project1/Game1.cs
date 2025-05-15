@@ -146,7 +146,7 @@ namespace Project1
                 for (int x = 0; x < _screen.X; x++)
                 {
                     float perlinValue = PerlinNoise(new Vector2(x, y));
-                    colors[x + y * (int)_screen.X] = new Color(perlinValue, perlinValue, 0);
+                    colors[x + y * (int)_screen.X] = new Color(perlinValue, 0, 0);
                 }
             }
             cpuPerlinTexture.SetData(colors);
@@ -183,9 +183,9 @@ namespace Project1
 
             gridUV = quintic(gridUV);
 
-            float b = MathHelper.Lerp(dotBl, dotBr, gridUV.X);
-            float t = MathHelper.Lerp(dotTl, dotTr, gridUV.X);
-            float perlin = MathHelper.Lerp(b, t, gridUV.Y);
+            float b = MathHelper.LerpPrecise(dotBl, dotBr, gridUV.X);
+            float t = MathHelper.LerpPrecise(dotTl, dotTr, gridUV.X);
+            float perlin = MathHelper.LerpPrecise(b, t, gridUV.Y);
 
             perlin += 0.1f;
 
@@ -197,25 +197,18 @@ namespace Project1
             return p - new Vector2((float)Math.Floor(p.X), (float)Math.Floor(p.Y));
         }
 
-        Vector2 result;
-        Vector2 p1;
-        Vector2 p2;
         Vector2 quintic(Vector2 p)
         {
             // return p * p * p * (10.0f + p * (-15.0f + p * 6.0f));
-            p1 = new Vector2(-15 + p.X * 6, -15 + p.Y * 6);
-            p2 = new Vector2(10 + p.X * p1.X, 10 + p.Y * p1.Y);
-            result = p * p * p * p2;
-
-            return result;
+            return p * p * p * (new Vector2(10 + p.X *(-15 + p.X * 6), 10 + p.Y * (-15 + p.Y * 6)));
         }
 
         Vector2 randomGradient(Vector2 p)
         {
             p = p + offset;
-            float x = Vector2.Dot(p, new Vector2(123.4f, 234.5f));
-            float y = Vector2.Dot(p, new Vector2(234.5f, 335.6f));
-            Vector2 gradient = new Vector2(x, y);
+            float x = Vector2.Dot(p, new (123.4f, 234.5f));
+            float y = Vector2.Dot(p, new (234.5f, 335.6f));
+            Vector2 gradient = new (x, y);
             gradient = new Vector2((float)Math.Sin(gradient.X),(float)Math.Sin(gradient.Y));
             gradient = gradient * 43758.5453f;
             gradient = new Vector2((float)Math.Sin(gradient.X + spin),(float)Math.Sin(gradient.Y + spin));
