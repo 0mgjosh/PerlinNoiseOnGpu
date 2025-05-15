@@ -22,6 +22,10 @@ namespace Project1
         private Vector2 offset = Vector2.Zero;
         private float perlin = 0;
 
+        bool show_Cpu = false;
+        Texture2D cpuPerlinTexture;
+
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -38,6 +42,7 @@ namespace Project1
             base.Initialize();
         }
 
+        Color[] colors = new Color[1280*1280];
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -46,9 +51,18 @@ namespace Project1
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
             _pixel.SetData([Color.White]);
             _renderTarget = new RenderTarget2D(GraphicsDevice, (int)_screen.X, (int)_screen.Y);
+            cpuPerlinTexture = new Texture2D(GraphicsDevice, (int)_screen.X, (int)_screen.Y);
+
+            for(int i = 0; i < colors.Length; i++)
+            {
+                colors[i] = Color.White;
+            }
+
+            cpuPerlinTexture.SetData(colors);
         }
 
         float previous_Scroll_Value;
+        bool generateCpuPerlin = false;
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -73,6 +87,18 @@ namespace Project1
             if(kstate.IsKeyDown(Keys.A)) offset.X -= 1f;
             if(kstate.IsKeyDown(Keys.D)) offset.X += 1f;
 
+            if (kstate.IsKeyDown(Keys.C)) show_Cpu = true; else show_Cpu = false;
+
+            if (show_Cpu && !generateCpuPerlin)
+            {
+                GenerateCpuPerlin();
+                generateCpuPerlin = true;
+            }
+            else if(!show_Cpu && generateCpuPerlin)
+            {
+                generateCpuPerlin = false;
+            }
+
             _effect.Parameters["spin"].SetValue(spin);
             _effect.Parameters["scale"].SetValue(scale);
             _effect.Parameters["offset"].SetValue(offset);
@@ -81,6 +107,8 @@ namespace Project1
 
             base.Update(gameTime);
         }
+
+
 
         protected override void Draw(GameTime gameTime)
         {
@@ -105,8 +133,23 @@ namespace Project1
             _spriteBatch.DrawString(_font, "Offset: " + offset, new Vector2(10, 70), Color.Red);
             _spriteBatch.DrawString(_font, "Perlin ( At Mouse ): " + perlin, new Vector2(10, 100), Color.Red);
 
+            if(show_Cpu)_spriteBatch.Draw(cpuPerlinTexture, Vector2.Zero, Color.White);
+
             _spriteBatch.End();
             base.Draw(gameTime);
+        }
+
+        void GenerateCpuPerlin()
+        {
+            for (int y = 0; y < _screen.Y; y++)
+            {
+                for (int x = 0; x < _screen.X; x++)
+                {
+                    float perlinValue = PerlinNoise(new Vector2(x, y));
+                    colors[x + y * (int)_screen.X] = new Color(perlinValue, perlinValue, 0);
+                }
+            }
+            cpuPerlinTexture.SetData(colors);
         }
 
         float PerlinNoise(Vector2 p)
