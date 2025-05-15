@@ -8,8 +8,9 @@
 #endif
 
 Texture2D SpriteTexture;
-float spin;
-float scale;
+float spin = 0;
+float scale = 1;
+float2 offset = float2(0,0);
 
 sampler2D SpriteTextureSampler = sampler_state
 {
@@ -25,7 +26,7 @@ struct VertexShaderOutput
 
 float2 randomGradient(float2 p)
 {
-    p = p + 0.02;
+    p = p + offset;
     float x = dot(p, float2(123.4, 234.5));
     float y = dot(p, float2(234.5, 335.6));
     float2 gradient = float2(x, y);
