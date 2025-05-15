@@ -84,7 +84,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 	
     perlin += 0.1;
         
-    return float4(perlin,perlin,perlin,1);
+    return float4(perlin,perlin,0,1);
 }
 
 technique SpriteDrawing
