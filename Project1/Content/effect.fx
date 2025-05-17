@@ -82,9 +82,9 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float t = lerp(dotTl, dotTr, gridUV.x);
     float perlin = lerp(b, t, gridUV.y);
 	
-    perlin += 0.1;
+    perlin += .5;
         
-    return float4(perlin,perlin,0,1);
+    return float4(perlin,perlin,perlin,1);
 }
 
 technique SpriteDrawing

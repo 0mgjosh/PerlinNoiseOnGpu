@@ -20,7 +20,7 @@ namespace Project1
         private float spin = 0;
         private float scale = 1;
         private Vector2 offset = Vector2.Zero;
-        private float perlin = 0;
+        private float perlinAtMouse;
 
         public Game1()
         {
@@ -46,12 +46,9 @@ namespace Project1
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
             _pixel.SetData([Color.White]);
             _renderTarget = new RenderTarget2D(GraphicsDevice, (int)_screen.X, (int)_screen.Y);
-
-
         }
 
         float previous_Scroll_Value;
-        bool generateCpuPerlin = false;
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -59,7 +56,7 @@ namespace Project1
             KeyboardState kstate = Keyboard.GetState();
             MouseState mstate = Mouse.GetState();
 
-            if(kstate.IsKeyDown(Keys.Left)) spin -= 0.1f;
+            if (kstate.IsKeyDown(Keys.Left)) spin -= 0.1f;
             if(kstate.IsKeyDown(Keys.Right)) spin += 0.1f;
             if (mstate.ScrollWheelValue > previous_Scroll_Value)
             {
@@ -80,7 +77,7 @@ namespace Project1
             _effect.Parameters["scale"].SetValue(scale);
             _effect.Parameters["offset"].SetValue(offset);
 
-            perlin = PerlinNoise(new Vector2(mstate.X, mstate.Y));
+            perlinAtMouse = GetPerlinAt(mstate.Position.ToVector2());
 
             base.Update(gameTime);
         }
@@ -96,7 +93,6 @@ namespace Project1
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp, sortMode: SpriteSortMode.Immediate);
             _effect.CurrentTechnique.Passes[0].Apply();
             _spriteBatch.Draw(_pixel, new Rectangle(0, 0, (int)_screen.X, (int)_screen.Y), Color.White);
-
             _spriteBatch.End();
             GraphicsDevice.SetRenderTarget(null);
 
@@ -108,74 +104,31 @@ namespace Project1
             _spriteBatch.DrawString(_font, "Spin: " + spin, new Vector2(10, 10), Color.Red);
             _spriteBatch.DrawString(_font, "Scale: " + scale, new Vector2(10, 40), Color.Red);
             _spriteBatch.DrawString(_font, "Offset: " + offset, new Vector2(10, 70), Color.Red);
-            _spriteBatch.DrawString(_font, "Perlin ( At Mouse ): " + perlin, new Vector2(10, 100), Color.Red);
+            _spriteBatch.DrawString(_font, "Perlin ( At Mouse ): " + perlinAtMouse, new Vector2(10, 100), Color.Red);
+
+            //_spriteBatch.Draw(_pixel, new Rectangle((int)mp.X-10, (int)mp.Y-10, 20, 20), new Color(perlinAtMouse,perlinAtMouse,perlinAtMouse));
 
             _spriteBatch.End();
             base.Draw(gameTime);
         }
 
-
-        float PerlinNoise(Vector2 p)
+        Color[] data = new Color[1280*1280];
+        int width;
+        int index;
+        float result;
+        Vector2 p;
+        float GetPerlinAt(Vector2 position)
         {
-            Vector2 uv = p/_screen;
+            width = _renderTarget.Width;
+            index = (int)(p.Y * width + p.X);
 
-            uv *= scale;
+            _renderTarget.GetData(data);
 
-            Vector2 gridID = Vector2.Floor(uv);
-            Vector2 gridUV = Frac(uv);
+            //index = Math.Clamp(index, 0, data.Length - 1);
 
-            Vector2 bl = gridID;
-            Vector2 br = gridID + new Vector2(1, 0);
-            Vector2 tl = gridID + new Vector2(0, 1);
-            Vector2 tr = gridID + new Vector2(1, 1);
+            result = data[index].R;
 
-            Vector2 gradBl = randomGradient(bl);
-            Vector2 gradBr = randomGradient(br);
-            Vector2 gradTl = randomGradient(tl);
-            Vector2 gradTr = randomGradient(tr);
-
-            Vector2 distFromPixelToBl = gridUV;
-            Vector2 distFromPixelToBr = gridUV - new Vector2(1, 0);
-            Vector2 distFromPixelToTl = gridUV - new Vector2(0, 1);
-            Vector2 distFromPixelToTr = gridUV - new Vector2(1, 1);
-
-            float dotBl = Vector2.Dot(gradBl, distFromPixelToBl);
-            float dotBr = Vector2.Dot(gradBr, distFromPixelToBr);
-            float dotTl = Vector2.Dot(gradTl, distFromPixelToTl);
-            float dotTr = Vector2.Dot(gradTr, distFromPixelToTr);
-
-            gridUV = quintic(gridUV);
-
-            float b = MathHelper.LerpPrecise(dotBl, dotBr, gridUV.X);
-            float t = MathHelper.LerpPrecise(dotTl, dotTr, gridUV.X);
-            float perlin = MathHelper.LerpPrecise(b, t, gridUV.Y);
-
-            perlin += 0.1f;
-
-            return perlin;
-        }
-
-        Vector2 Frac(Vector2 p)
-        {
-            return p - new Vector2((float)Math.Floor(p.X), (float)Math.Floor(p.Y));
-        }
-
-        Vector2 quintic(Vector2 p)
-        {
-            // return p * p * p * (10.0f + p * (-15.0f + p * 6.0f));
-            return p * p * p * (new Vector2(10 + p.X *(-15 + p.X * 6), 10 + p.Y * (-15 + p.Y * 6)));
-        }
-
-        Vector2 randomGradient(Vector2 p)
-        {
-            p = p + offset;
-            float x = Vector2.Dot(p, new (123.4f, 234.5f));
-            float y = Vector2.Dot(p, new (234.5f, 335.6f));
-            Vector2 gradient = new (x, y);
-            gradient = new Vector2((float)Math.Sin(gradient.X),(float)Math.Sin(gradient.Y));
-            gradient = gradient * 43758.5453f;
-            gradient = new Vector2((float)Math.Sin(gradient.X + spin),(float)Math.Sin(gradient.Y + spin));
-            return gradient;
+            return result;
         }
     }
 }
