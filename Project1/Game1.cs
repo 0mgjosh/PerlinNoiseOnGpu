@@ -49,12 +49,14 @@ namespace Project1
         }
 
         float previous_Scroll_Value;
+        Vector2 mp;
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             KeyboardState kstate = Keyboard.GetState();
             MouseState mstate = Mouse.GetState();
+            mp = mstate.Position.ToVector2();
 
             if (kstate.IsKeyDown(Keys.Left)) spin -= 0.1f;
             if(kstate.IsKeyDown(Keys.Right)) spin += 0.1f;
@@ -77,7 +79,7 @@ namespace Project1
             _effect.Parameters["scale"].SetValue(scale);
             _effect.Parameters["offset"].SetValue(offset);
 
-            perlinAtMouse = GetPerlinAt(mstate.Position.ToVector2());
+            perlinAtMouse = GetPerlinAt(mp);
 
             base.Update(gameTime);
         }
@@ -105,6 +107,7 @@ namespace Project1
             _spriteBatch.DrawString(_font, "Scale: " + scale, new Vector2(10, 40), Color.Red);
             _spriteBatch.DrawString(_font, "Offset: " + offset, new Vector2(10, 70), Color.Red);
             _spriteBatch.DrawString(_font, "Perlin ( At Mouse ): " + perlinAtMouse, new Vector2(10, 100), Color.Red);
+            _spriteBatch.DrawString(_font, "Mouse Position: " + mp, new Vector2(10, 130), Color.Red);
 
             //_spriteBatch.Draw(_pixel, new Rectangle((int)mp.X-10, (int)mp.Y-10, 20, 20), new Color(perlinAtMouse,perlinAtMouse,perlinAtMouse));
 
@@ -119,12 +122,13 @@ namespace Project1
         Vector2 p;
         float GetPerlinAt(Vector2 position)
         {
+            p = position;
             width = _renderTarget.Width;
             index = (int)(p.Y * width + p.X);
 
             _renderTarget.GetData(data);
 
-            //index = Math.Clamp(index, 0, data.Length - 1);
+            index = Math.Clamp(index, 0, data.Length - 1);
 
             result = data[index].R;
 
