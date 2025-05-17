@@ -84,8 +84,6 @@ namespace Project1
             base.Update(gameTime);
         }
 
-
-
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
@@ -109,7 +107,7 @@ namespace Project1
             _spriteBatch.DrawString(_font, "Perlin ( At Mouse ): " + perlinAtMouse, new Vector2(10, 100), Color.Red);
             _spriteBatch.DrawString(_font, "Mouse Position: " + mp, new Vector2(10, 130), Color.Red);
 
-            //_spriteBatch.Draw(_pixel, new Rectangle((int)mp.X-10, (int)mp.Y-10, 20, 20), new Color(perlinAtMouse,perlinAtMouse,perlinAtMouse));
+            _spriteBatch.Draw(_pixel, new Rectangle((int)mp.X- (int)perlinAtMouse/2, (int)mp.Y- (int)perlinAtMouse/2, (int)perlinAtMouse, (int)perlinAtMouse), Color.White);
 
             _spriteBatch.End();
             base.Draw(gameTime);
