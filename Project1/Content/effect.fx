@@ -87,12 +87,15 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     uv -= float2(.5, .5);
 	    
     float perlin1 = GetPerlin(uv.x, uv.y, 1, .5, 11410);
-    float perlin2 = GetPerlin(uv.x, uv.y, .1, .5, 212315);
-    float perlin3 = GetPerlin(uv.x, uv.y, .2, .5, 161234);
+    float add1 = GetPerlin(uv.x, uv.y, 2, .5, 11410);
+    float subtract1 = GetPerlin(uv.x, uv.y, .1, .5, 11410);
     
-    float average = (perlin1 + perlin2 + perlin3) / 3;
-    average = round(average-level);
-    return float4(average, average, average, 1);
+    perlin1 -= subtract1;
+    perlin1 += add1;
+    smoothstep(perlin1, add1, .5);
+    perlin1 = round(perlin1 - level);
+    
+    return float4(perlin1, subtract1, perlin1, 1);
 }
 
 technique SpriteDrawing

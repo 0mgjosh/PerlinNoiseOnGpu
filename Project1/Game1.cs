@@ -20,7 +20,7 @@ namespace Project1
         private float spin = 0;
         private float scale = 1;
         private Vector2 offset = Vector2.Zero;
-        float level = 0;
+        float level = 1;
 
         float prev_scale;
         Vector2 prev_offset;
@@ -80,12 +80,14 @@ namespace Project1
 
             if (mstate.ScrollWheelValue > previous_Scroll_Value)
             {
-                scale += 0.5f;
+                scale -= 5f;
+                scale = Math.Clamp(scale, 1, 500);
                 previous_Scroll_Value = mstate.ScrollWheelValue;
             }
             if (mstate.ScrollWheelValue < previous_Scroll_Value)
             {
-                scale -= 0.5f;
+                scale += 5f;
+                scale = Math.Clamp(scale, 1, 500);
                 previous_Scroll_Value = mstate.ScrollWheelValue;
             }
 
@@ -94,10 +96,10 @@ namespace Project1
             if(kstate.IsKeyDown(Keys.Down)) level -= 0.01f;
 
 
-            if (kstate.IsKeyDown(Keys.W)) offset.Y -= .1f;
-            if (kstate.IsKeyDown(Keys.S)) offset.Y += .1f;
-            if (kstate.IsKeyDown(Keys.A)) offset.X -= .1f;
-            if (kstate.IsKeyDown(Keys.D)) offset.X += .1f;
+            if (kstate.IsKeyDown(Keys.W)) offset.Y -= .5f;
+            if (kstate.IsKeyDown(Keys.S)) offset.Y += .5f;
+            if (kstate.IsKeyDown(Keys.A)) offset.X -= .5f;
+            if (kstate.IsKeyDown(Keys.D)) offset.X += .5f;
 
             if(spin != prev_spin || scale != prev_scale || offset != prev_offset || level != prev_level)
             {
@@ -132,6 +134,7 @@ namespace Project1
             _spriteBatch.DrawString(_font, "Offset: " + offset, new Vector2(10, 70), Color.Red);
             _spriteBatch.DrawString(_font, "Perlin ( At Mouse ): " + perlinAtMouse, new Vector2(10, 100), Color.Red);
             _spriteBatch.DrawString(_font, "Mouse Position: " + mp, new Vector2(10, 130), Color.Red);
+            _spriteBatch.DrawString(_font, "Level: " + level, new Vector2(10, 160), Color.Red);
 
             //_spriteBatch.Draw(_pixel, new Rectangle((int)mp.X- (int)perlinAtMouse/2, (int)mp.Y- (int)perlinAtMouse/2, (int)perlinAtMouse, (int)perlinAtMouse), Color.White);
 
