@@ -20,10 +20,12 @@ namespace Project1
         private float spin = 0;
         private float scale = 1;
         private Vector2 offset = Vector2.Zero;
+        float level = 0;
 
         float prev_scale;
         Vector2 prev_offset;
         float prev_spin;
+        float prev_level;
 
         private float perlinAtMouse;
 
@@ -71,8 +73,11 @@ namespace Project1
             prev_offset = offset;
             prev_spin = spin;
 
+            
             if (kstate.IsKeyDown(Keys.Left)) spin -= 0.1f;
             if (kstate.IsKeyDown(Keys.Right)) spin += 0.1f;
+
+
             if (mstate.ScrollWheelValue > previous_Scroll_Value)
             {
                 scale += 0.5f;
@@ -83,12 +88,18 @@ namespace Project1
                 scale -= 0.5f;
                 previous_Scroll_Value = mstate.ScrollWheelValue;
             }
-            if (kstate.IsKeyDown(Keys.W)) offset.Y -= 1f;
-            if (kstate.IsKeyDown(Keys.S)) offset.Y += 1f;
-            if (kstate.IsKeyDown(Keys.A)) offset.X -= 1f;
-            if (kstate.IsKeyDown(Keys.D)) offset.X += 1f;
 
-            if(spin != prev_spin || scale != prev_scale || offset != prev_offset)
+
+            if(kstate.IsKeyDown(Keys.Up)) level += 0.01f;
+            if(kstate.IsKeyDown(Keys.Down)) level -= 0.01f;
+
+
+            if (kstate.IsKeyDown(Keys.W)) offset.Y -= .1f;
+            if (kstate.IsKeyDown(Keys.S)) offset.Y += .1f;
+            if (kstate.IsKeyDown(Keys.A)) offset.X -= .1f;
+            if (kstate.IsKeyDown(Keys.D)) offset.X += .1f;
+
+            if(spin != prev_spin || scale != prev_scale || offset != prev_offset || level != prev_level)
             {
                 SetEffectParameters();
                 SetData();
@@ -122,7 +133,7 @@ namespace Project1
             _spriteBatch.DrawString(_font, "Perlin ( At Mouse ): " + perlinAtMouse, new Vector2(10, 100), Color.Red);
             _spriteBatch.DrawString(_font, "Mouse Position: " + mp, new Vector2(10, 130), Color.Red);
 
-            _spriteBatch.Draw(_pixel, new Rectangle((int)mp.X- (int)perlinAtMouse/2, (int)mp.Y- (int)perlinAtMouse/2, (int)perlinAtMouse, (int)perlinAtMouse), Color.White);
+            //_spriteBatch.Draw(_pixel, new Rectangle((int)mp.X- (int)perlinAtMouse/2, (int)mp.Y- (int)perlinAtMouse/2, (int)perlinAtMouse, (int)perlinAtMouse), Color.White);
 
             _spriteBatch.End();
             base.Draw(gameTime);
@@ -155,6 +166,7 @@ namespace Project1
             _effect.Parameters["spin"].SetValue(spin);
             _effect.Parameters["scale"].SetValue(scale);
             _effect.Parameters["offset"].SetValue(offset);
+            _effect.Parameters["level"].SetValue(level);
         }
     }
 }
