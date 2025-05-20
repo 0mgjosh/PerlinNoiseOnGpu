@@ -16,6 +16,7 @@ namespace Project1
         private Effect _effect;
         private Texture2D _pixel;
         private RenderTarget2D _renderTarget;
+        private Texture2D pic;
 
         private float spin = 0;
         private float scale = 1;
@@ -55,6 +56,8 @@ namespace Project1
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
             _pixel.SetData([Color.White]);
             _renderTarget = new RenderTarget2D(GraphicsDevice, (int)_screen.X, (int)_screen.Y);
+            pic = Content.Load<Texture2D>("pic");
+            _effect.Parameters["pallette"].SetValue(pic);
             SetEffectParameters();
             SetData();
         }
@@ -169,7 +172,7 @@ namespace Project1
             _effect.Parameters["spin"].SetValue(spin);
             _effect.Parameters["scale"].SetValue(scale);
             _effect.Parameters["offset"].SetValue(offset);
-            _effect.Parameters["level"].SetValue(level);
+            //_effect.Parameters["level"].SetValue(level);
         }
     }
 }

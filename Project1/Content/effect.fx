@@ -8,6 +8,7 @@
 #endif
 
 Texture2D SpriteTexture;
+Texture2D pallette;
 float spin = 0;
 float scale = 1;
 float2 offset = float2(0,0);
@@ -16,6 +17,10 @@ float level = 0;
 sampler2D SpriteTextureSampler = sampler_state
 {
 	Texture = <SpriteTexture>;
+};
+sampler2D PalletteSampler = sampler_state
+{
+    Texture = <pallette>;
 };
 
 struct VertexShaderOutput
@@ -92,10 +97,14 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     
     perlin1 -= subtract1;
     perlin1 += add1;
-    smoothstep(perlin1, add1, .5);
-    perlin1 = round(perlin1 - level);
+    clamp(perlin1, 0, 1);
+    //smoothstep(perlin1, add1, .5);
+    //perlin1 = round(perlin1 - level);
     
-    return float4(perlin1, subtract1, perlin1, 1);
+    float4 pointless = tex2D(SpriteTextureSampler, uv);
+    float4 colored = tex2D(PalletteSampler, float2(perlin1, .5));
+    
+    return float4(colored.r, colored.g, colored.b, pointless.a);
 }
 
 technique SpriteDrawing
