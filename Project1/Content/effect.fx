@@ -30,13 +30,13 @@ struct VertexShaderOutput
 	float2 TextureCoordinates : TEXCOORD0;
 };
 
-float2 randomGradient(float2 p, float seed)
+float2 randomGradient(float2 p)
 {
     float x = dot(p, float2(123.4, 234.5));
     float y = dot(p, float2(234.5, 335.6));
     float2 gradient = float2(x, y);
     gradient = sin(gradient);
-    gradient = gradient * seed;
+    gradient = gradient * 127365.123;
     gradient = sin(gradient + spin);
     return gradient;
 }
@@ -46,13 +46,13 @@ float2 quintic(float2 p)
     return p * p * p * (10.0 + p * (-15.0 + p * 6.0));
 }
 
-float GetPerlin(float x, float y, float multiplier, float boost, float seed)
+float GetPerlin(float x, float y)
 {
     float2 coord = float2(x, y);
     
-    coord *= scale * multiplier;
+    coord *= scale;
     
-    coord += offset * multiplier;
+    coord += offset;
     
     float2 gridID = floor(coord);
     float2 gridUV = frac(coord);
@@ -62,10 +62,10 @@ float GetPerlin(float x, float y, float multiplier, float boost, float seed)
     float2 tl = gridID + float2(0, 1);
     float2 tr = gridID + float2(1, 1);
     
-    float2 gradBl = randomGradient(bl, seed);
-    float2 gradBr = randomGradient(br, seed);
-    float2 gradTl = randomGradient(tl, seed);
-    float2 gradTr = randomGradient(tr, seed);
+    float2 gradBl = randomGradient(bl);
+    float2 gradBr = randomGradient(br);
+    float2 gradTl = randomGradient(tl);
+    float2 gradTr = randomGradient(tr);
     
     float2 distFromPixelToBl = gridUV;
     float2 distFromPixelToBr = gridUV - float2(1, 0);
@@ -83,7 +83,32 @@ float GetPerlin(float x, float y, float multiplier, float boost, float seed)
     float t = lerp(dotTl, dotTr, gridUV.x);
     float result = lerp(b, t, gridUV.y);
 	    
-    return result + boost;
+    return result;
+}
+
+float OctavePerlin(float x, float y, float z, int octaves, float persistence)
+{
+    float total = 0;
+    float frequency = 1;
+    float amplitude = 1;
+    float maxValue = 0; // Used for normalizing result to 0.0 - 1.0
+    
+    
+    for (int i = 0; i < octaves; i++)
+    {
+        float2 coord = float2(x, y);
+        coord *= frequency;
+        
+        total += GetPerlin(coord.x, coord.y) * amplitude;
+        
+        maxValue += amplitude;
+        
+        amplitude *= persistence;
+        
+        frequency *= 2;
+    }
+    
+    return total / maxValue + .3;
 }
 
 float4 MainPS(VertexShaderOutput input) : COLOR
@@ -91,20 +116,12 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float2 uv = input.TextureCoordinates;
     uv -= float2(.5, .5);
 	    
-    float perlin1 = GetPerlin(uv.x, uv.y, 1, .5, 11410);
-    float add1 = GetPerlin(uv.x, uv.y, 2, .5, 11410);
-    float subtract1 = GetPerlin(uv.x, uv.y, .1, .5, 11410);
+    float perlin = OctavePerlin(uv.x, uv.y, 0, 10, .5);
     
-    perlin1 -= subtract1;
-    perlin1 += add1;
-    clamp(perlin1, 0, 1);
-    //smoothstep(perlin1, add1, .5);
-    //perlin1 = round(perlin1 - level);
+    float green = perlin * round(perlin);
+     // float blue = ~ get otherside of green for the blue channel
     
-    float4 pointless = tex2D(SpriteTextureSampler, uv);
-    float4 colored = tex2D(PalletteSampler, float2(perlin1, .5));
-    
-    return float4(colored.r, colored.g, colored.b, pointless.a);
+    return float4(0,green,0,1);
 }
 
 technique SpriteDrawing

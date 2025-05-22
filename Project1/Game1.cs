@@ -19,7 +19,7 @@ namespace Project1
         private Texture2D pic;
 
         private float spin = 0;
-        private float scale = 1;
+        private float scale = 20;
         private Vector2 offset = Vector2.Zero;
         float level = 1;
 
@@ -57,13 +57,14 @@ namespace Project1
             _pixel.SetData([Color.White]);
             _renderTarget = new RenderTarget2D(GraphicsDevice, (int)_screen.X, (int)_screen.Y);
             pic = Content.Load<Texture2D>("pic");
-            _effect.Parameters["pallette"].SetValue(pic);
+            //_effect.Parameters["pallette"].SetValue(pic);
             SetEffectParameters();
             SetData();
         }
 
         float previous_Scroll_Value;
         Vector2 mp;
+        float offset_speed = 0.01f;
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -99,10 +100,10 @@ namespace Project1
             if(kstate.IsKeyDown(Keys.Down)) level -= 0.01f;
 
 
-            if (kstate.IsKeyDown(Keys.W)) offset.Y -= .5f;
-            if (kstate.IsKeyDown(Keys.S)) offset.Y += .5f;
-            if (kstate.IsKeyDown(Keys.A)) offset.X -= .5f;
-            if (kstate.IsKeyDown(Keys.D)) offset.X += .5f;
+            if (kstate.IsKeyDown(Keys.W)) offset.Y -= offset_speed;
+            if (kstate.IsKeyDown(Keys.S)) offset.Y += offset_speed;
+            if (kstate.IsKeyDown(Keys.A)) offset.X -= offset_speed;
+            if (kstate.IsKeyDown(Keys.D)) offset.X += offset_speed;
 
             if(spin != prev_spin || scale != prev_scale || offset != prev_offset || level != prev_level)
             {
