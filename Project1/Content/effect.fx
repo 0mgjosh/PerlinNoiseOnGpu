@@ -120,8 +120,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 	    
     float perlin = OctavePerlin(uv.x, uv.y, 0, octave, .5);
     
-    //float green = (perlin * round(perlin));
-    //float blue = (perlin * ((round(perlin) + 1) % 2));
+    // float green = (perlin * round(perlin));
+    // float blue = (perlin * ((round(perlin) + 1) % 2));
     
     return float4(perlin,0,0,1);
 }
