@@ -12,6 +12,7 @@ Texture2D pallette;
 float spin = 0;
 float scale = 1;
 float2 offset = float2(0,0);
+int octave = 1;
 float level = 0;
 
 sampler2D SpriteTextureSampler = sampler_state
@@ -46,13 +47,13 @@ float2 quintic(float2 p)
     return p * p * p * (10.0 + p * (-15.0 + p * 6.0));
 }
 
-float GetPerlin(float x, float y)
+float GetPerlin(float x, float y, float frequency)
 {
     float2 coord = float2(x, y);
     
     coord *= scale;
     
-    coord += offset;
+    coord += offset * frequency;
     
     float2 gridID = floor(coord);
     float2 gridUV = frac(coord);
@@ -97,9 +98,10 @@ float OctavePerlin(float x, float y, float z, int octaves, float persistence)
     for (int i = 0; i < octaves; i++)
     {
         float2 coord = float2(x, y);
+        
         coord *= frequency;
         
-        total += GetPerlin(coord.x, coord.y) * amplitude;
+        total += GetPerlin(coord.x, coord.y, frequency) * amplitude;
         
         maxValue += amplitude;
         
@@ -116,12 +118,12 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float2 uv = input.TextureCoordinates;
     uv -= float2(.5, .5);
 	    
-    float perlin = OctavePerlin(uv.x, uv.y, 0, 10, .5);
+    float perlin = OctavePerlin(uv.x, uv.y, 0, octave, .5);
     
-    float green = perlin * round(perlin);
-     // float blue = ~ get otherside of green for the blue channel
+    //float green = (perlin * round(perlin));
+    //float blue = (perlin * ((round(perlin) + 1) % 2));
     
-    return float4(0,green,0,1);
+    return float4(perlin,0,0,1);
 }
 
 technique SpriteDrawing

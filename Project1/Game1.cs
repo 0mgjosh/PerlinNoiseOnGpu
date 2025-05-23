@@ -19,18 +19,24 @@ namespace Project1
         private Texture2D pic;
 
         private float spin = 0;
-        private float scale = 20;
+        private float scale = 1;
         private Vector2 offset = Vector2.Zero;
         float level = 1;
 
         float prev_scale;
         Vector2 prev_offset;
         float prev_spin;
-        float prev_level;
 
         private float perlinAtMouse;
 
         private Color[] data = new Color[1280 * 1280];
+
+        private float oct;
+        float scale_max = 5;
+        float scale_min = 0.05f;
+        float scale_inc = 0.01f;
+        float scale_move_speed = 0.001f;
+        int max_octaves = 15;
 
         public Game1()
         {
@@ -64,7 +70,6 @@ namespace Project1
 
         float previous_Scroll_Value;
         Vector2 mp;
-        float offset_speed = 0.01f;
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -84,14 +89,14 @@ namespace Project1
 
             if (mstate.ScrollWheelValue > previous_Scroll_Value)
             {
-                scale -= 5f;
-                scale = Math.Clamp(scale, 1, 500);
+                scale -= scale_inc;
+                scale = Math.Clamp(scale, scale_min, scale_max);
                 previous_Scroll_Value = mstate.ScrollWheelValue;
             }
             if (mstate.ScrollWheelValue < previous_Scroll_Value)
             {
-                scale += 5f;
-                scale = Math.Clamp(scale, 1, 500);
+                scale += scale_inc;
+                scale = Math.Clamp(scale, scale_min, scale_max);
                 previous_Scroll_Value = mstate.ScrollWheelValue;
             }
 
@@ -100,12 +105,12 @@ namespace Project1
             if(kstate.IsKeyDown(Keys.Down)) level -= 0.01f;
 
 
-            if (kstate.IsKeyDown(Keys.W)) offset.Y -= offset_speed;
-            if (kstate.IsKeyDown(Keys.S)) offset.Y += offset_speed;
-            if (kstate.IsKeyDown(Keys.A)) offset.X -= offset_speed;
-            if (kstate.IsKeyDown(Keys.D)) offset.X += offset_speed;
+            if (kstate.IsKeyDown(Keys.W)) offset.Y -= scale_move_speed;
+            if (kstate.IsKeyDown(Keys.S)) offset.Y += scale_move_speed;
+            if (kstate.IsKeyDown(Keys.A)) offset.X -= scale_move_speed;
+            if (kstate.IsKeyDown(Keys.D)) offset.X += scale_move_speed;
 
-            if(spin != prev_spin || scale != prev_scale || offset != prev_offset || level != prev_level)
+            if(spin != prev_spin || scale != prev_scale || offset != prev_offset)
             {
                 SetEffectParameters();
                 SetData();
@@ -139,6 +144,7 @@ namespace Project1
             _spriteBatch.DrawString(_font, "Perlin ( At Mouse ): " + perlinAtMouse, new Vector2(10, 100), Color.Red);
             _spriteBatch.DrawString(_font, "Mouse Position: " + mp, new Vector2(10, 130), Color.Red);
             _spriteBatch.DrawString(_font, "Level: " + level, new Vector2(10, 160), Color.Red);
+            _spriteBatch.DrawString(_font, "Octaves: " + oct, new Vector2(10, 190), Color.Red);
 
             //_spriteBatch.Draw(_pixel, new Rectangle((int)mp.X- (int)perlinAtMouse/2, (int)mp.Y- (int)perlinAtMouse/2, (int)perlinAtMouse, (int)perlinAtMouse), Color.White);
 
@@ -173,7 +179,9 @@ namespace Project1
             _effect.Parameters["spin"].SetValue(spin);
             _effect.Parameters["scale"].SetValue(scale);
             _effect.Parameters["offset"].SetValue(offset);
-            //_effect.Parameters["level"].SetValue(level);
+            
+            oct = (max_octaves+1)-(max_octaves * (scale/scale_max));
+            _effect.Parameters["octave"].SetValue((int)Math.Round(oct+2));
         }
     }
 }
