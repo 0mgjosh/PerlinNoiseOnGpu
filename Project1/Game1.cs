@@ -33,10 +33,11 @@ namespace Project1
 
         private float oct;
         float scale_max = 5;
-        float scale_min = 0.05f;
-        float scale_inc = 0.01f;
+        float scale_min = 0.005f;
+        float scale_inc = 0.1f;
         float scale_move_speed = 0.001f;
-        int max_octaves = 15;
+        float scale_move_speed_mult = 0;
+        int max_octaves = 10;
 
         public Game1()
         {
@@ -62,8 +63,8 @@ namespace Project1
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
             _pixel.SetData([Color.White]);
             _renderTarget = new RenderTarget2D(GraphicsDevice, (int)_screen.X, (int)_screen.Y);
-            pic = Content.Load<Texture2D>("pic");
-            //_effect.Parameters["pallette"].SetValue(pic);
+            pic = Content.Load<Texture2D>("Palette");
+            //_effect.Parameters["palette"].SetValue(pic);
             SetEffectParameters();
             SetData();
         }
@@ -82,7 +83,12 @@ namespace Project1
             prev_offset = offset;
             prev_spin = spin;
 
-            
+            if(kstate.IsKeyDown(Keys.LeftShift))
+            {
+                scale_move_speed_mult = 20f;
+            } else scale_move_speed_mult = 1f;
+
+
             if (kstate.IsKeyDown(Keys.Left)) spin -= 0.1f;
             if (kstate.IsKeyDown(Keys.Right)) spin += 0.1f;
 
@@ -105,10 +111,10 @@ namespace Project1
             if(kstate.IsKeyDown(Keys.Down)) level -= 0.01f;
 
 
-            if (kstate.IsKeyDown(Keys.W)) offset.Y -= scale_move_speed;
-            if (kstate.IsKeyDown(Keys.S)) offset.Y += scale_move_speed;
-            if (kstate.IsKeyDown(Keys.A)) offset.X -= scale_move_speed;
-            if (kstate.IsKeyDown(Keys.D)) offset.X += scale_move_speed;
+            if (kstate.IsKeyDown(Keys.W)) offset.Y -= scale_move_speed * scale_move_speed_mult;
+            if (kstate.IsKeyDown(Keys.S)) offset.Y += scale_move_speed * scale_move_speed_mult;
+            if (kstate.IsKeyDown(Keys.A)) offset.X -= scale_move_speed * scale_move_speed_mult;
+            if (kstate.IsKeyDown(Keys.D)) offset.X += scale_move_speed * scale_move_speed_mult;
 
             if(spin != prev_spin || scale != prev_scale || offset != prev_offset)
             {
@@ -145,8 +151,6 @@ namespace Project1
             _spriteBatch.DrawString(_font, "Mouse Position: " + mp, new Vector2(10, 130), Color.Red);
             _spriteBatch.DrawString(_font, "Level: " + level, new Vector2(10, 160), Color.Red);
             _spriteBatch.DrawString(_font, "Octaves: " + oct, new Vector2(10, 190), Color.Red);
-
-            //_spriteBatch.Draw(_pixel, new Rectangle((int)mp.X- (int)perlinAtMouse/2, (int)mp.Y- (int)perlinAtMouse/2, (int)perlinAtMouse, (int)perlinAtMouse), Color.White);
 
             _spriteBatch.End();
             base.Draw(gameTime);

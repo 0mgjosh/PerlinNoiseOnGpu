@@ -8,7 +8,7 @@
 #endif
 
 Texture2D SpriteTexture;
-Texture2D pallette;
+Texture2D palette;
 float spin = 0;
 float scale = 1;
 float2 offset = float2(0,0);
@@ -21,7 +21,7 @@ sampler2D SpriteTextureSampler = sampler_state
 };
 sampler2D PalletteSampler = sampler_state
 {
-    Texture = <pallette>;
+    Texture = <palette>;
 };
 
 struct VertexShaderOutput
@@ -119,13 +119,13 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     uv -= float2(.5, .5);
 	    
     float perlin = OctavePerlin(uv.x, uv.y, 0, octave, .5);
-    float river = OctavePerlin(uv.x, uv.y, 0, 2, .5);
-    river = clamp(river, .6, .7);
     
     float green = (perlin * round(perlin));
+    green = smoothstep(0, .5, green) * green;
     float blue = (perlin * ((round(perlin) + 1) % 2));
+    blue = smoothstep(-.5, .5, blue) * blue;
     
-    return float4(perlin*0,green,blue,1);
+    return float4(0, green, blue, 1);
 }
 
 technique SpriteDrawing
