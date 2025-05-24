@@ -87,7 +87,7 @@ float GetPerlin(float x, float y, float frequency)
     return result;
 }
 
-float OctavePerlin(float x, float y, float z, int octaves, float persistence)
+float OctavePerlin(float x, float y, float z, int octaves, float persistence, float boost)
 {
     float total = 0;
     float frequency = 1;
@@ -110,7 +110,7 @@ float OctavePerlin(float x, float y, float z, int octaves, float persistence)
         frequency *= 2;
     }
     
-    return total / maxValue + .3;
+    return total / maxValue + boost;
 }
 
 float4 MainPS(VertexShaderOutput input) : COLOR
@@ -118,12 +118,15 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float2 uv = input.TextureCoordinates;
     uv -= float2(.5, .5);
 	    
-    float perlin = OctavePerlin(uv.x, uv.y, 0, octave, .5);
+    float perlin = OctavePerlin(uv.x, uv.y, 0, octave, .5, .3);
     
-    float green = (perlin * round(perlin));
-    green = smoothstep(0, .5, green) * green;
-    float blue = (perlin * ((round(perlin) + 1) % 2));
-    blue = smoothstep(-.5, .5, blue) * blue;
+    float green_gate = round(perlin);
+    float green = (perlin * green_gate);
+    green = (((green -.5) * 3) + .5) * green_gate;
+    
+    float blue_gate = ((round(perlin) + 1) % 2);
+    float blue = (perlin * blue_gate);
+    blue = (((blue + 1) / 2) - .3) * blue_gate;
     
     return float4(0, green, blue, 1);
 }

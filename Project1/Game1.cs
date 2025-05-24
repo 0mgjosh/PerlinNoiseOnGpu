@@ -32,11 +32,11 @@ namespace Project1
         private Color[] data = new Color[1280 * 1280];
 
         private float oct;
-        float scale_max = 5;
+        float scale_max = 50;
         float scale_min = 0.005f;
         float scale_inc = 0.1f;
         float scale_move_speed = 0.001f;
-        float scale_move_speed_mult = 0;
+        float move_multiplier = 0;
         int max_octaves = 10;
 
         public Game1()
@@ -85,8 +85,8 @@ namespace Project1
 
             if(kstate.IsKeyDown(Keys.LeftShift))
             {
-                scale_move_speed_mult = 20f;
-            } else scale_move_speed_mult = 1f;
+                move_multiplier = 20f;
+            } else move_multiplier = 1f;
 
 
             if (kstate.IsKeyDown(Keys.Left)) spin -= 0.1f;
@@ -95,13 +95,13 @@ namespace Project1
 
             if (mstate.ScrollWheelValue > previous_Scroll_Value)
             {
-                scale -= scale_inc;
+                scale -= scale_inc*move_multiplier;
                 scale = Math.Clamp(scale, scale_min, scale_max);
                 previous_Scroll_Value = mstate.ScrollWheelValue;
             }
             if (mstate.ScrollWheelValue < previous_Scroll_Value)
             {
-                scale += scale_inc;
+                scale += scale_inc * move_multiplier;
                 scale = Math.Clamp(scale, scale_min, scale_max);
                 previous_Scroll_Value = mstate.ScrollWheelValue;
             }
@@ -111,10 +111,10 @@ namespace Project1
             if(kstate.IsKeyDown(Keys.Down)) level -= 0.01f;
 
 
-            if (kstate.IsKeyDown(Keys.W)) offset.Y -= scale_move_speed * scale_move_speed_mult;
-            if (kstate.IsKeyDown(Keys.S)) offset.Y += scale_move_speed * scale_move_speed_mult;
-            if (kstate.IsKeyDown(Keys.A)) offset.X -= scale_move_speed * scale_move_speed_mult;
-            if (kstate.IsKeyDown(Keys.D)) offset.X += scale_move_speed * scale_move_speed_mult;
+            if (kstate.IsKeyDown(Keys.W)) offset.Y -= scale_move_speed * move_multiplier;
+            if (kstate.IsKeyDown(Keys.S)) offset.Y += scale_move_speed * move_multiplier;
+            if (kstate.IsKeyDown(Keys.A)) offset.X -= scale_move_speed * move_multiplier;
+            if (kstate.IsKeyDown(Keys.D)) offset.X += scale_move_speed * move_multiplier;
 
             if(spin != prev_spin || scale != prev_scale || offset != prev_offset)
             {
