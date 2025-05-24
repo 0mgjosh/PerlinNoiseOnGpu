@@ -119,11 +119,13 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     uv -= float2(.5, .5);
 	    
     float perlin = OctavePerlin(uv.x, uv.y, 0, octave, .5);
+    float river = OctavePerlin(uv.x, uv.y, 0, 2, .5);
+    river = clamp(river, .6, .7);
     
     float green = (perlin * round(perlin));
     float blue = (perlin * ((round(perlin) + 1) % 2));
     
-    return float4(0,green,blue,1);
+    return float4(perlin*0,green,blue,1);
 }
 
 technique SpriteDrawing
