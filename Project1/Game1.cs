@@ -15,6 +15,7 @@ namespace Project1
         private SpriteFont _font;
         private Effect _effect;
         private Texture2D _pixel;
+        private Texture2D _crosshair;
         private RenderTarget2D _renderTarget;
         private Texture2D pic;
 
@@ -32,10 +33,10 @@ namespace Project1
         private Color[] data = new Color[1280 * 1280];
 
         private float oct;
-        float scale_max = 50;
+        float scale_max = 10;
         float scale_min = 0.005f;
         float scale_inc = 0.1f;
-        float scale_move_speed = 0.001f;
+        float scale_move_speed = 0.01f;
         float move_multiplier = 0;
         int max_octaves = 10;
 
@@ -60,11 +61,12 @@ namespace Project1
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _font = Content.Load<SpriteFont>("font");
             _effect = Content.Load<Effect>("effect");
+            _crosshair = Content.Load<Texture2D>("Crosshair");
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
             _pixel.SetData([Color.White]);
             _renderTarget = new RenderTarget2D(GraphicsDevice, (int)_screen.X, (int)_screen.Y);
             pic = Content.Load<Texture2D>("Palette");
-            //_effect.Parameters["palette"].SetValue(pic);
+            _effect.Parameters["palette"].SetValue(pic);
             SetEffectParameters();
             SetData();
         }
@@ -151,6 +153,8 @@ namespace Project1
             _spriteBatch.DrawString(_font, "Mouse Position: " + mp, new Vector2(10, 130), Color.Red);
             _spriteBatch.DrawString(_font, "Level: " + level, new Vector2(10, 160), Color.Red);
             _spriteBatch.DrawString(_font, "Octaves: " + oct, new Vector2(10, 190), Color.Red);
+
+            _spriteBatch.Draw(_crosshair, (_screen/2),null, Color.White,default, new(_crosshair.Width/2, _crosshair.Height/2), 3, SpriteEffects.None, default);
 
             _spriteBatch.End();
             base.Draw(gameTime);

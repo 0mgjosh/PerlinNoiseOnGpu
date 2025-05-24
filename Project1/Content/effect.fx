@@ -118,17 +118,24 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float2 uv = input.TextureCoordinates;
     uv -= float2(.5, .5);
 	    
-    float perlin = OctavePerlin(uv.x, uv.y, 0, octave, .5, .3);
+    float perlin = OctavePerlin(uv.x, uv.y, 0, octave, .5, 0);
+    perlin = (perlin + 1) / 2; // Normalize to 0-1 range
+    perlin = clamp(perlin-.1, 0, 1); // Raise sea level
+        
+    //float green_gate = round(perlin);
+    //float green = (perlin * green_gate);
+    //green = (((green -.5) * 3) + .5) * green_gate;
     
-    float green_gate = round(perlin);
-    float green = (perlin * green_gate);
-    green = (((green -.5) * 3) + .5) * green_gate;
+    //float blue_gate = ((round(perlin) + 1) % 2);
+    //float blue = (perlin * blue_gate);
+    //blue = (((blue + 1) / 2) - .3) * blue_gate;
     
-    float blue_gate = ((round(perlin) + 1) % 2);
-    float blue = (perlin * blue_gate);
-    blue = (((blue + 1) / 2) - .3) * blue_gate;
+    float4 alpha = tex2D(SpriteTextureSampler, uv);
     
-    return float4(0, green, blue, 1);
+    float paletteX = (floor(perlin * 48) + .5) / 48;
+    float4 color = tex2D(PalletteSampler, float2( paletteX, .5));
+        
+    return float4(color.r,color.g,color.b,alpha.a);
 }
 
 technique SpriteDrawing
