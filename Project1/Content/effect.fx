@@ -162,7 +162,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     perlin = (perlin + 1) / 2; // Normalize to 0-1 range
     perlin = clamp(perlin-.1, 0, 1); // Raise sea level
     
-    float temperature = GetPerlinScaled(uv.x, uv.y, .1, 52312.234);
+    float temperature = GetPerlinScaled(uv.x, uv.y, .05, 52312.234);
     temperature *= 1.5;
     temperature = (temperature + 1) / 2; // Normalize to 0-1 range
         
@@ -177,7 +177,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float4 alpha = tex2D(SpriteTextureSampler, uv);
     
     float paletteX = (floor(perlin * 48) + .5) / 48;
-    float paletteY = (floor(temperature * 7) + .5) / 7;
+    float paletteY = (floor(temperature * 11) + .5) / 11;
+    paletteY = clamp(paletteY, 0, 1);
     float4 color = tex2D(PalletteSampler, float2( paletteX, paletteY));
         
     return float4(color.r,color.g,color.b,alpha.a);
