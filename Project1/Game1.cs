@@ -13,7 +13,7 @@ namespace Project1
 
         private Vector2 _screen = new(1280, 1280);
         private SpriteFont _font;
-        private Effect _effect;
+        private Effect _perlin;
         private Texture2D _pixel;
         private Texture2D _crosshair;
         private RenderTarget2D _renderTarget;
@@ -33,7 +33,7 @@ namespace Project1
         private Color[] data = new Color[1280 * 1280];
 
         private float oct;
-        float scale_max = 10;
+        float scale_max = 200;
         float scale_min = 0.005f;
         float scale_inc = 0.1f;
         float scale_move_speed = 0.01f;
@@ -60,14 +60,14 @@ namespace Project1
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _font = Content.Load<SpriteFont>("font");
-            _effect = Content.Load<Effect>("effect");
+            _perlin = Content.Load<Effect>("effect");
             _crosshair = Content.Load<Texture2D>("Crosshair");
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
             _pixel.SetData([Color.White]);
             _renderTarget = new RenderTarget2D(GraphicsDevice, (int)_screen.X, (int)_screen.Y);
             pic = Content.Load<Texture2D>("Palette");
-            _effect.Parameters["palette"].SetValue(pic);
             SetEffectParameters();
+            SetSeeds(35263.2353f, 3161.3612f);
             SetData();
         }
 
@@ -136,7 +136,7 @@ namespace Project1
             // Draw To Target
             GraphicsDevice.SetRenderTarget(_renderTarget);
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp, sortMode: SpriteSortMode.Immediate);
-            _effect.CurrentTechnique.Passes[0].Apply();
+            _perlin.CurrentTechnique.Passes[0].Apply();
             _spriteBatch.Draw(_pixel, new Rectangle(0, 0, (int)_screen.X, (int)_screen.Y), Color.White);
             _spriteBatch.End();
             GraphicsDevice.SetRenderTarget(null);
@@ -184,12 +184,18 @@ namespace Project1
 
         private void SetEffectParameters()
         {
-            _effect.Parameters["spin"].SetValue(spin);
-            _effect.Parameters["scale"].SetValue(scale);
-            _effect.Parameters["offset"].SetValue(offset);
-            
+            _perlin.Parameters["spin"].SetValue(spin);
+            _perlin.Parameters["scale"].SetValue(scale);
+            _perlin.Parameters["offset"].SetValue(offset);
+
             oct = (max_octaves+1)-(max_octaves * (scale/scale_max));
-            _effect.Parameters["octave"].SetValue((int)Math.Round(oct+2));
+            _perlin.Parameters["octave"].SetValue((int)Math.Round(oct+2));
+        }
+
+        private void SetSeeds(float worldseed, float tempseed)
+        {
+            _perlin.Parameters["WORLDSEED"].SetValue(worldseed);
+            _perlin.Parameters["TEMPERATURESEED"].SetValue(tempseed);
         }
     }
 }

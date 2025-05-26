@@ -8,12 +8,12 @@
 #endif
 
 Texture2D SpriteTexture;
-Texture2D palette;
 float spin = 0;
 float scale = 1;
 float2 offset = float2(0,0);
 int octave = 1;
-float level = 0;
+float WORLDSEED = 1;
+float TEMPERATURESEED = 1;
 
 sampler2D SpriteTextureSampler = sampler_state
 {
@@ -91,7 +91,7 @@ float GetPerlinScaled(float x, float y, float scaler, float seed)
 {
     float2 coord = float2(x, y);
     
-    coord *= scale*scaler;
+    coord *= scale * scaler;
     
     coord += offset * scaler;
     
@@ -127,7 +127,7 @@ float GetPerlinScaled(float x, float y, float scaler, float seed)
     return result;
 }
 
-float OctavePerlin(float x, float y, float z, int octaves, float persistence, float boost, float seed)
+float OctavePerlin(float x, float y, int octaves, float persistence, float boost, float seed)
 {
     float total = 0;
     float frequency = 1;
@@ -158,30 +158,24 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float2 uv = input.TextureCoordinates;
     uv -= float2(.5, .5);
 	    
-    float perlin = OctavePerlin(uv.x, uv.y, 0, octave, .5, 0, 52312.234);
+    float perlin = OctavePerlin(uv.x, uv.y, octave, .5, 0, WORLDSEED);
     perlin = (perlin + 1) / 2; // Normalize to 0-1 range
     perlin = clamp(perlin-.1, 0, 1); // Raise sea level
     
-    float temperature = GetPerlinScaled(uv.x, uv.y, .05, 52312.234);
-    temperature *= 1.5;
+    
+    float temperature = GetPerlinScaled(uv.x, uv.y, .1, TEMPERATURESEED);
+    temperature *= 2;
     temperature = (temperature + 1) / 2; // Normalize to 0-1 range
+    temperature = clamp(temperature, 0, 1); // Raise sea level
         
-    //float green_gate = round(perlin);
-    //float green = (perlin * green_gate);
-    //green = (((green -.5) * 3) + .5) * green_gate;
-    
-    //float blue_gate = ((round(perlin) + 1) % 2);
-    //float blue = (perlin * blue_gate);
-    //blue = (((blue + 1) / 2) - .3) * blue_gate;
-    
     float4 alpha = tex2D(SpriteTextureSampler, uv);
     
     float paletteX = (floor(perlin * 48) + .5) / 48;
     float paletteY = (floor(temperature * 11) + .5) / 11;
     paletteY = clamp(paletteY, 0, 1);
-    float4 color = tex2D(PalletteSampler, float2( paletteX, paletteY));
+    float4 color = tex2D(PalletteSampler, float2(paletteX, paletteY));
         
-    return float4(color.r,color.g,color.b,alpha.a);
+    return float4(perlin,temperature,0,1);
 }
 
 technique SpriteDrawing
