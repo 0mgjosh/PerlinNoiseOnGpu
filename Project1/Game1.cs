@@ -17,6 +17,7 @@ namespace Project1
         private Texture2D _pixel;
         private Texture2D _crosshair;
         private RenderTarget2D _renderTarget;
+        private RenderTarget2D _finalTarget;
         private Texture2D pic;
 
         private float spin = 0;
@@ -65,6 +66,7 @@ namespace Project1
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
             _pixel.SetData([Color.White]);
             _renderTarget = new RenderTarget2D(GraphicsDevice, (int)_screen.X, (int)_screen.Y);
+            _finalTarget = new RenderTarget2D(GraphicsDevice, (int)_screen.X, (int)_screen.Y);
             pic = Content.Load<Texture2D>("Palette");
             SetEffectParameters();
             SetSeeds(35263.2353f, 3161.3612f);
@@ -139,12 +141,18 @@ namespace Project1
             _perlin.CurrentTechnique.Passes[0].Apply();
             _spriteBatch.Draw(_pixel, new Rectangle(0, 0, (int)_screen.X, (int)_screen.Y), Color.White);
             _spriteBatch.End();
-            GraphicsDevice.SetRenderTarget(null);
+            GraphicsDevice.SetRenderTarget(_finalTarget);
 
-            // Final Draw
+            _spriteBatch.Begin(samplerState: SamplerState.PointClamp, sortMode: SpriteSortMode.Immediate);
+
+            _spriteBatch.Draw(_renderTarget, new Rectangle(0,0, (int)_screen.X, (int)_screen.Y), Color.White);
+
+            _spriteBatch.End();
+
+            // Draw Final to target
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp, sortMode: SpriteSortMode.Immediate);
             
-            _spriteBatch.Draw(_renderTarget, new Rectangle(0, 0, (int)_screen.X, (int)_screen.Y), Color.White);
+            _spriteBatch.Draw(_finalTarget, new Rectangle(0, 0, (int)_screen.X, (int)_screen.Y), Color.White);
 
             _spriteBatch.DrawString(_font, "Spin: " + spin, new Vector2(10, 10), Color.Red);
             _spriteBatch.DrawString(_font, "Scale: " + scale, new Vector2(10, 40), Color.Red);
