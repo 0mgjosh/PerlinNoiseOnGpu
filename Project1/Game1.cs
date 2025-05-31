@@ -14,11 +14,12 @@ namespace Project1
         private Vector2 _screen = new(1280, 1280);
         private SpriteFont _font;
         private Effect _perlin;
+        private Effect _colorize;
         private Texture2D _pixel;
         private Texture2D _crosshair;
         private RenderTarget2D _renderTarget;
         private RenderTarget2D _finalTarget;
-        private Texture2D pic;
+        private Texture2D Palette;
 
         private float spin = 0;
         private float scale = 1;
@@ -36,8 +37,8 @@ namespace Project1
         private float oct;
         float scale_max = 200;
         float scale_min = 0.005f;
-        float scale_inc = 0.1f;
-        float scale_move_speed = 0.01f;
+        float scale_inc = 0.5f;
+        float scale_move_speed = 0.1f;
         float move_multiplier = 0;
         int max_octaves = 10;
 
@@ -62,19 +63,22 @@ namespace Project1
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _font = Content.Load<SpriteFont>("font");
             _perlin = Content.Load<Effect>("effect");
+            _colorize = Content.Load<Effect>("Colorize");
             _crosshair = Content.Load<Texture2D>("Crosshair");
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
             _pixel.SetData([Color.White]);
             _renderTarget = new RenderTarget2D(GraphicsDevice, (int)_screen.X, (int)_screen.Y);
             _finalTarget = new RenderTarget2D(GraphicsDevice, (int)_screen.X, (int)_screen.Y);
-            pic = Content.Load<Texture2D>("Palette");
+            Palette = Content.Load<Texture2D>("Palette2");
             SetEffectParameters();
-            SetSeeds(35263.2353f, 3161.3612f);
+            SetSeeds(363.2353f, 361.3612f);
+            //SetColorize();
             SetData();
         }
 
         float previous_Scroll_Value;
         Vector2 mp;
+        float time;
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -82,6 +86,10 @@ namespace Project1
             KeyboardState kstate = Keyboard.GetState();
             MouseState mstate = Mouse.GetState();
             mp = mstate.Position.ToVector2();
+            time += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            Vector2 sunPos = new Vector2((float)Math.Sin(time), (float)Math.Cos(time));
+            _colorize.Parameters["sun"].SetValue(new Vector3(sunPos.X,sunPos.Y,1f));
 
             prev_scale = scale;
             prev_offset = offset;
@@ -89,7 +97,7 @@ namespace Project1
 
             if(kstate.IsKeyDown(Keys.LeftShift))
             {
-                move_multiplier = 20f;
+                move_multiplier = 1000f;
             } else move_multiplier = 1f;
 
 
@@ -99,13 +107,13 @@ namespace Project1
 
             if (mstate.ScrollWheelValue > previous_Scroll_Value)
             {
-                scale -= scale_inc*move_multiplier;
+                scale -= scale_inc*(move_multiplier/5);
                 scale = Math.Clamp(scale, scale_min, scale_max);
                 previous_Scroll_Value = mstate.ScrollWheelValue;
             }
             if (mstate.ScrollWheelValue < previous_Scroll_Value)
             {
-                scale += scale_inc * move_multiplier;
+                scale += scale_inc*(move_multiplier / 5);
                 scale = Math.Clamp(scale, scale_min, scale_max);
                 previous_Scroll_Value = mstate.ScrollWheelValue;
             }
@@ -149,10 +157,19 @@ namespace Project1
 
             _spriteBatch.End();
 
+            GraphicsDevice.SetRenderTarget(null);
+
             // Draw Final to target
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp, sortMode: SpriteSortMode.Immediate);
             
+            _colorize.CurrentTechnique.Passes[0].Apply();
+
             _spriteBatch.Draw(_finalTarget, new Rectangle(0, 0, (int)_screen.X, (int)_screen.Y), Color.White);
+
+            _spriteBatch.End();
+
+            // Draw Text and crosshair
+            _spriteBatch.Begin(samplerState: SamplerState.PointClamp, sortMode: SpriteSortMode.Immediate);
 
             _spriteBatch.DrawString(_font, "Spin: " + spin, new Vector2(10, 10), Color.Red);
             _spriteBatch.DrawString(_font, "Scale: " + scale, new Vector2(10, 40), Color.Red);
@@ -162,9 +179,10 @@ namespace Project1
             _spriteBatch.DrawString(_font, "Level: " + level, new Vector2(10, 160), Color.Red);
             _spriteBatch.DrawString(_font, "Octaves: " + oct, new Vector2(10, 190), Color.Red);
 
-            _spriteBatch.Draw(_crosshair, (_screen/2),null, Color.White,default, new(_crosshair.Width/2, _crosshair.Height/2), 3, SpriteEffects.None, default);
+            _spriteBatch.Draw(_crosshair, (_screen / 2), null, Color.White, default, new(_crosshair.Width / 2, _crosshair.Height / 2), 3, SpriteEffects.None, default);
 
             _spriteBatch.End();
+
             base.Draw(gameTime);
         }
 
@@ -204,6 +222,11 @@ namespace Project1
         {
             _perlin.Parameters["WORLDSEED"].SetValue(worldseed);
             _perlin.Parameters["TEMPERATURESEED"].SetValue(tempseed);
+        }
+
+        private void SetColorize()
+        {
+            _colorize.Parameters["PaletteTexture"].SetValue(Palette);
         }
     }
 }
