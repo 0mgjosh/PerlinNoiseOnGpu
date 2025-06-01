@@ -14,6 +14,8 @@ float2 offset = float2(0,0);
 int octave = 1;
 float WORLDSEED = 1;
 float TEMPERATURESEED = 1;
+float3 SUN;
+
 
 sampler2D SpriteTextureSampler = sampler_state
 {
@@ -162,6 +164,13 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     perlin = (perlin + 1) / 2; // Normalize to 0-1 range
     perlin = clamp(perlin-.1, 0, 1); // Raise sea level
     
+    float diff = 0.001;
+    float l1 = OctavePerlin(uv.x + diff, uv.y, octave, .5, 0, WORLDSEED);
+    float l2 = OctavePerlin(uv.x - diff, uv.y, octave, .5, 0, WORLDSEED);
+    float l3 = OctavePerlin(uv.x, uv.y + diff, octave, .5, 0, WORLDSEED);
+    float l4 = OctavePerlin(uv.x, uv.y - diff, octave, .5, 0, WORLDSEED);
+    float3 normal = normalize(float3(l1 - l2, l3 - l4, .0001));
+    float diffuseStrength = max(0, dot(normal,SUN));    
     
     float temperature = GetPerlinScaled(uv.x, uv.y, .1, TEMPERATURESEED);
     temperature *= 2;
@@ -175,7 +184,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     paletteY = clamp(paletteY, 0, 1);
     float4 color = tex2D(PalletteSampler, float2(paletteX, paletteY));
         
-    return float4(perlin,temperature,0,1);
+    return float4(perlin, temperature, diffuseStrength, 1);
 }
 
 technique SpriteDrawing

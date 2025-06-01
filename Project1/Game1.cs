@@ -38,7 +38,7 @@ namespace Project1
         float scale_max = 200;
         float scale_min = 0.005f;
         float scale_inc = 0.5f;
-        float scale_move_speed = 0.1f;
+        float scale_move_speed = 0.001f;
         float move_multiplier = 0;
         int max_octaves = 10;
 
@@ -85,11 +85,12 @@ namespace Project1
                 Exit();
             KeyboardState kstate = Keyboard.GetState();
             MouseState mstate = Mouse.GetState();
+            Vector2 mPos = mstate.Position.ToVector2();
             mp = mstate.Position.ToVector2();
             time += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            Vector2 sunPos = new Vector2((float)Math.Sin(time), (float)Math.Cos(time));
-            _colorize.Parameters["sun"].SetValue(new Vector3(sunPos.X,sunPos.Y,1f));
+            Vector3 sunPos = new Vector3((mPos.X/_screen.X)-.5f,(mPos.Y/_screen.Y)-.5f,.5f);
+            _perlin.Parameters["SUN"].SetValue(new Vector3(sunPos.X,sunPos.Y,sunPos.Z));
 
             prev_scale = scale;
             prev_offset = offset;
