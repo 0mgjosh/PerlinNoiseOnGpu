@@ -45,30 +45,6 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     
     color -= (perlinSample.b/1.2) * isLand;
 	
-    //float3 sample_position = float3(coords.x, coords.y, perlinSample.r);
-    //float3 direction = normalize(sun-sample_position);
-    //float point_distance = distance(sun,sample_position);
-    //float shadow = 0;
-    //float shadow_length = 0;
-	
-    //for (int i = 0; i < 100; i++)
-    //{
-    //    float a1 = tex2D(SpriteTextureSampler, sample_position.xy + float2(0,.0001)).r;
-    //    float a2 = tex2D(SpriteTextureSampler, sample_position.xy + float2(-.0001,-.0001)).r;
-    //    float a3 = tex2D(SpriteTextureSampler, sample_position.xy + float2(.0001,.0001)).r;
-    //    float a4 = tex2D(SpriteTextureSampler, sample_position.xy).r;
-    //    float perlin_at_step = (a1 + a2 + a3+a4)/4;
-        
-    //    sample_position += direction * (i*0.0001);
-       
-    //    if (perlin_at_step > sample_position.z)
-    //    {
-    //        shadow_length = i;
-    //        shadow = shadow_length;
-    //    }
-
-    //}
-    //shadow *= isLand;
     return color;
 }
 
