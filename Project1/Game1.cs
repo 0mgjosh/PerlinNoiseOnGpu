@@ -38,7 +38,7 @@ namespace Project1
         float scale_max = 200;
         float scale_min = 0.005f;
         float scale_inc = 0.5f;
-        float scale_move_speed = 0.001f;
+        float scale_move_speed = 0.1f;
         float move_multiplier = 0;
         int max_octaves = 10;
 

@@ -40,8 +40,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float land = perlinSample.r * 1.8 * isLand;
     float water = perlinSample.r * isWater;
 	
-    float4 color = float4(temp, land, water, 
-    1);
+    float4 color = float4(clamp(temp,.01,.55), land, water, 1);
     
     color -= (perlinSample.b/1.2) * isLand;
 	
