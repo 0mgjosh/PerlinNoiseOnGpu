@@ -164,7 +164,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     perlin = (perlin + 1) / 2; // Normalize to 0-1 range
     perlin = clamp(perlin-.1, 0, 1); // Raise sea level
     
-    float diff = 0.001;
+    float diff = 0.05 / scale;
     float l1 = OctavePerlin(uv.x + diff, uv.y, octave, .5, 0, WORLDSEED);
     float l2 = OctavePerlin(uv.x - diff, uv.y, octave, .5, 0, WORLDSEED);
     float l3 = OctavePerlin(uv.x, uv.y + diff, octave, .5, 0, WORLDSEED);
