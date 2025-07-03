@@ -20,6 +20,7 @@ namespace Project1
         private RenderTarget2D _renderTarget;
         private RenderTarget2D _finalTarget;
         private Texture2D Palette;
+        private Texture2D noisey;
 
         private float spin = 0;
         private float scale = 1;
@@ -35,12 +36,12 @@ namespace Project1
         private Color[] data = new Color[1280 * 1280];
 
         private float oct;
-        float scale_max = 200;
+        float scale_max = 20;
         float scale_min = 0.005f;
         float scale_inc = 0.5f;
         float scale_move_speed = 0.1f;
         float move_multiplier = 0;
-        int max_octaves = 10;
+        int max_octaves = 5;
 
         public Game1()
         {
@@ -70,8 +71,11 @@ namespace Project1
             _renderTarget = new RenderTarget2D(GraphicsDevice, (int)_screen.X, (int)_screen.Y);
             _finalTarget = new RenderTarget2D(GraphicsDevice, (int)_screen.X, (int)_screen.Y);
             Palette = Content.Load<Texture2D>("Palette2");
+            noisey = Content.Load<Texture2D>("1280noise");
+
+            _colorize.Parameters["NoiseTexture"].SetValue(noisey);
             SetEffectParameters();
-            SetSeeds(363.2353f, 361.3612f);
+            SetSeeds(33.2353f, 61.3612f);
             //SetColorize();
             SetData();
         }
@@ -79,6 +83,8 @@ namespace Project1
         float previous_Scroll_Value;
         Vector2 mp;
         float time;
+        bool clicked;
+        Vector3 sunPos = new();
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -89,7 +95,8 @@ namespace Project1
             mp = mstate.Position.ToVector2();
             time += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            Vector3 sunPos = new Vector3((mPos.X/_screen.X)-.5f,(mPos.Y/_screen.Y)-.5f,.5f);
+            sunPos = new Vector3((mPos.X/_screen.X)-.5f,(mPos.Y/_screen.Y)-.5f,.5f);
+            //sunPos = new Vector3(0, 0, -1f);
             _perlin.Parameters["SUN"].SetValue(new Vector3(sunPos.X,sunPos.Y,sunPos.Z));
 
             prev_scale = scale;
@@ -129,7 +136,17 @@ namespace Project1
             if (kstate.IsKeyDown(Keys.A)) offset.X -= scale_move_speed * move_multiplier;
             if (kstate.IsKeyDown(Keys.D)) offset.X += scale_move_speed * move_multiplier;
 
-            if(spin != prev_spin || scale != prev_scale || offset != prev_offset)
+            if (clicked == false && mstate.LeftButton == ButtonState.Pressed)
+            {                
+                offset += ((mp/1280)-new Vector2(.5f,.5f))*scale;
+                clicked = true;
+            }
+            else if (clicked == true && mstate.LeftButton == ButtonState.Released)
+            {
+                clicked = false;
+            }
+
+            if (spin != prev_spin || scale != prev_scale || offset != prev_offset)
             {
                 SetEffectParameters();
                 SetData();

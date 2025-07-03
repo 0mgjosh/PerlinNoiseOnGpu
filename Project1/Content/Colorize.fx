@@ -9,6 +9,7 @@
 
 Texture2D SpriteTexture;
 Texture2D PaletteTexture;
+Texture2D NoiseTexture;
 
 sampler2D SpriteTextureSampler = sampler_state
 {
@@ -18,6 +19,11 @@ sampler2D SpriteTextureSampler = sampler_state
 sampler2D PaletteTextureSampler = sampler_state
 {
 	Texture = <PaletteTexture>;
+};
+
+sampler2D NoiseTextureSampler = sampler_state
+{
+	Texture = <NoiseTexture>;
 };
 
 struct VertexShaderOutput
@@ -31,6 +37,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float2 coords = input.TextureCoordinates;
     float4 perlinSample = tex2D(SpriteTextureSampler, coords);
+    float4 noiseSample = tex2D(NoiseTextureSampler, coords);
 	
     float isLand = perlinSample.r * round(perlinSample.r);
     float isWater = !isLand;
@@ -44,7 +51,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     
     color -= (perlinSample.b/1.2) * isLand;
 	
-    return color;
+    return color + (noiseSample/10);
 }
 
 technique SpriteDrawing

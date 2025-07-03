@@ -7,6 +7,7 @@
 	#define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
+
 Texture2D SpriteTexture;
 float spin = 0;
 float scale = 1;
@@ -34,14 +35,9 @@ struct VertexShaderOutput
 };
 
 float2 randomGradient(float2 p, float seed)
-{
-    float x = dot(p, float2(123.4, 234.5));
-    float y = dot(p, float2(234.5, 335.6));
-    float2 gradient = float2(x, y);
-    gradient = sin(gradient);
-    gradient = gradient * seed;
-    gradient = sin(gradient + spin);
-    return gradient;
+{        
+    return frac(sin(float2(dot(p, float2(12.34, 45.67)),
+        dot(p, float2(78.9, 3.14)))) * seed + spin) * 2.0 - 1.0;
 }
 
 float2 quintic(float2 p)
@@ -164,13 +160,13 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     perlin = (perlin + 1) / 2; // Normalize to 0-1 range
     perlin = clamp(perlin-.1, 0, 1); // Raise sea level
     
-    float diff = 0.05 / scale;
+    float diff = 0.005 / scale;
     float l1 = OctavePerlin(uv.x + diff, uv.y, octave, .5, 0, WORLDSEED);
     float l2 = OctavePerlin(uv.x - diff, uv.y, octave, .5, 0, WORLDSEED);
     float l3 = OctavePerlin(uv.x, uv.y + diff, octave, .5, 0, WORLDSEED);
     float l4 = OctavePerlin(uv.x, uv.y - diff, octave, .5, 0, WORLDSEED);
     float3 normal = normalize(float3(l1 - l2, l3 - l4, .0001));
-    float diffuseStrength = max(0, dot(normal,SUN));    
+    float diffuseStrength = max(0, dot(normal, SUN));
     
     float temperature = GetPerlinScaled(uv.x, uv.y, .1, TEMPERATURESEED);
     temperature *= 2;
@@ -184,7 +180,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     paletteY = clamp(paletteY, 0, 1);
     float4 color = tex2D(PalletteSampler, float2(paletteX, paletteY));
         
-    return float4(perlin, temperature, diffuseStrength, 1);
+    return float4(perlin, temperature, diffuseStrength, 0);
 }
 
 technique SpriteDrawing
